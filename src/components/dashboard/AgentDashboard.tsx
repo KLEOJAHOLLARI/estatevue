@@ -12,10 +12,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Mail, MailOpen, Building2, MessageSquare } from "lucide-react";
+import ImageUpload from "@/components/ImageUpload";
 
 const emptyForm = {
   title: "", description: "", price: "", city: "", state: "", address: "",
-  property_type: "house", bedrooms: "3", bathrooms: "2", area_sqft: "", images: "",
+  property_type: "house", bedrooms: "3", bathrooms: "2", area_sqft: "", images: [] as string[],
 };
 
 export default function AgentDashboard() {

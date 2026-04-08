@@ -7,29 +7,37 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Users, Building2, CheckCircle, XCircle, Trash2 } from "lucide-react";
+import type { Database } from "@/integrations/supabase/types";
+
+type AppRole = Database["public"]["Enums"]["app_role"];
 
 export default function Admin() {
   const { user, hasRole, loading } = useAuth();
   const queryClient = useQueryClient();
 
-  const { data: properties } = useQuery({
+  const { data: properties, isLoading: propsLoading } = useQuery({
     queryKey: ["admin-all-properties"],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("properties")
         .select("*, profiles!properties_created_by_fkey(full_name)")
         .order("created_at", { ascending: false });
+      if (error) throw error;
       return data || [];
     },
     enabled: !!user && hasRole("admin"),
   });
 
-  const { data: users } = useQuery({
+  const { data: users, isLoading: usersLoading } = useQuery({
     queryKey: ["admin-all-users"],
     queryFn: async () => {
-      const { data } = await supabase.from("profiles").select("*, user_roles(role)");
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*, user_roles(role)");
+      if (error) throw error;
       return data || [];
     },
     enabled: !!user && hasRole("admin"),
@@ -44,6 +52,7 @@ export default function Admin() {
       toast.success("Property status updated");
       queryClient.invalidateQueries({ queryKey: ["admin-all-properties"] });
     },
+    onError: (err: any) => toast.error(err.message),
   });
 
   const deleteProperty = useMutation({
@@ -55,11 +64,11 @@ export default function Admin() {
       toast.success("Property deleted");
       queryClient.invalidateQueries({ queryKey: ["admin-all-properties"] });
     },
+    onError: (err: any) => toast.error(err.message),
   });
 
   const deleteUser = useMutation({
     mutationFn: async (userId: string) => {
-      // Delete user roles and profile (cascade will handle the rest)
       const { error: roleErr } = await supabase.from("user_roles").delete().eq("user_id", userId);
       if (roleErr) throw roleErr;
       const { error: profileErr } = await supabase.from("profiles").delete().eq("user_id", userId);
@@ -67,6 +76,20 @@ export default function Admin() {
     },
     onSuccess: () => {
       toast.success("User data deleted");
+      queryClient.invalidateQueries({ queryKey: ["admin-all-users"] });
+    },
+    onError: (err: any) => toast.error(err.message),
+  });
+
+  const updateRole = useMutation({
+    mutationFn: async ({ userId, role }: { userId: string; role: AppRole }) => {
+      const { error: delError } = await supabase.from("user_roles").delete().eq("user_id", userId);
+      if (delError) throw delError;
+      const { error } = await supabase.from("user_roles").insert({ user_id: userId, role });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("User role updated");
       queryClient.invalidateQueries({ queryKey: ["admin-all-users"] });
     },
     onError: (err: any) => toast.error(err.message),
@@ -107,73 +130,92 @@ export default function Admin() {
         </TabsList>
 
         <TabsContent value="properties" className="mt-6">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Title</TableHead>
-                <TableHead>City</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Agent</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {properties?.map((p: any) => (
-                <TableRow key={p.id}>
-                  <TableCell className="font-medium">{p.title}</TableCell>
-                  <TableCell>{p.city}</TableCell>
-                  <TableCell>{fmt(p.price)}</TableCell>
-                  <TableCell><Badge className={statusColor(p.status)}>{p.status}</Badge></TableCell>
-                  <TableCell>{p.profiles?.full_name || "Unknown"}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-1">
-                      <Button size="sm" variant="outline" disabled={p.status === "approved"} onClick={() => updatePropertyStatus.mutate({ id: p.id, status: "approved" })}>
-                        <CheckCircle className="h-4 w-4" />
-                      </Button>
-                      <Button size="sm" variant="outline" disabled={p.status === "rejected"} onClick={() => updatePropertyStatus.mutate({ id: p.id, status: "rejected" })}>
-                        <XCircle className="h-4 w-4" />
-                      </Button>
-                      <Button size="sm" variant="destructive" onClick={() => { if (confirm("Delete this property?")) deleteProperty.mutate(p.id); }}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
+          {propsLoading ? (
+            <p className="text-center text-muted-foreground py-8">Loading properties...</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Title</TableHead>
+                  <TableHead>City</TableHead>
+                  <TableHead>Price</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Agent</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
-              ))}
-              {(!properties || properties.length === 0) && (
-                <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">No properties found</TableCell></TableRow>
-              )}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {properties?.map((p: any) => (
+                  <TableRow key={p.id}>
+                    <TableCell className="font-medium">{p.title}</TableCell>
+                    <TableCell>{p.city}</TableCell>
+                    <TableCell>{fmt(p.price)}</TableCell>
+                    <TableCell><Badge className={statusColor(p.status)}>{p.status}</Badge></TableCell>
+                    <TableCell>{p.profiles?.full_name || "Unknown"}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-1">
+                        <Button size="sm" variant="outline" disabled={p.status === "approved"} onClick={() => updatePropertyStatus.mutate({ id: p.id, status: "approved" })}>
+                          <CheckCircle className="h-4 w-4" />
+                        </Button>
+                        <Button size="sm" variant="outline" disabled={p.status === "rejected"} onClick={() => updatePropertyStatus.mutate({ id: p.id, status: "rejected" })}>
+                          <XCircle className="h-4 w-4" />
+                        </Button>
+                        <Button size="sm" variant="destructive" onClick={() => { if (confirm("Delete this property?")) deleteProperty.mutate(p.id); }}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {(!properties || properties.length === 0) && (
+                  <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">No properties found</TableCell></TableRow>
+                )}
+              </TableBody>
+            </Table>
+          )}
         </TabsContent>
 
         <TabsContent value="users" className="mt-6">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {users?.map((u: any) => (
-                <TableRow key={u.id}>
-                  <TableCell className="font-medium">{u.full_name || "No name"}</TableCell>
-                  <TableCell><Badge variant="secondary">{u.user_roles?.[0]?.role || "user"}</Badge></TableCell>
-                  <TableCell className="text-right">
-                    <Button size="sm" variant="destructive" onClick={() => { if (confirm("Delete this user's data?")) deleteUser.mutate(u.user_id); }}>
-                      <Trash2 className="h-4 w-4 mr-1" />Delete
-                    </Button>
-                  </TableCell>
+          {usersLoading ? (
+            <p className="text-center text-muted-foreground py-8">Loading users...</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Change Role</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
-              ))}
-              {(!users || users.length === 0) && (
-                <TableRow><TableCell colSpan={3} className="text-center text-muted-foreground py-8">No users found</TableCell></TableRow>
-              )}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {users?.map((u: any) => (
+                  <TableRow key={u.id}>
+                    <TableCell className="font-medium">{u.full_name || "No name"}</TableCell>
+                    <TableCell><Badge variant="secondary">{u.user_roles?.[0]?.role || "user"}</Badge></TableCell>
+                    <TableCell>
+                      <Select defaultValue={u.user_roles?.[0]?.role || "user"} onValueChange={(v) => updateRole.mutate({ userId: u.user_id, role: v as AppRole })}>
+                        <SelectTrigger className="w-[120px]"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="user">User</SelectItem>
+                          <SelectItem value="agent">Agent</SelectItem>
+                          <SelectItem value="admin">Admin</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button size="sm" variant="destructive" onClick={() => { if (confirm("Delete this user's data?")) deleteUser.mutate(u.user_id); }}>
+                        <Trash2 className="h-4 w-4 mr-1" />Delete
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {(!users || users.length === 0) && (
+                  <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-8">No users found</TableCell></TableRow>
+                )}
+              </TableBody>
+            </Table>
+          )}
         </TabsContent>
       </Tabs>
     </div>

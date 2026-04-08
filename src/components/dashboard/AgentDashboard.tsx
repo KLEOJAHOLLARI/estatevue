@@ -138,7 +138,7 @@ export default function AgentDashboard() {
                 <Input placeholder="Baths" type="number" value={form.bathrooms} onChange={(e) => setForm({ ...form, bathrooms: e.target.value })} />
               </div>
               <Input placeholder="Area (sqft)" type="number" value={form.area_sqft} onChange={(e) => setForm({ ...form, area_sqft: e.target.value })} />
-              <Input placeholder="Image URLs (comma separated)" value={form.images} onChange={(e) => setForm({ ...form, images: e.target.value })} />
+              <ImageUpload images={form.images} onChange={(imgs) => setForm({ ...form, images: imgs })} />
               <Button type="submit" className="w-full" disabled={saveMutation.isPending}>{saveMutation.isPending ? "Saving..." : editId ? "Update" : "Create"}</Button>
             </form>
           </DialogContent>

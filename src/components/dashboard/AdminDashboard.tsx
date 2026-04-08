@@ -25,7 +25,8 @@ export default function AdminDashboard() {
   const { data: allUsers } = useQuery({
     queryKey: ["admin-users"],
     queryFn: async () => {
-      const { data } = await supabase.from("profiles").select("*, user_roles(role)");
+      const { data, error } = await supabase.from("profiles").select("*, user_roles(role)");
+      if (error) throw error;
       return data || [];
     },
   });

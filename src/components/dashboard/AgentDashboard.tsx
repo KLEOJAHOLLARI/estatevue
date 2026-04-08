@@ -49,7 +49,7 @@ export default function AgentDashboard() {
         city: form.city, state: form.state || null, address: form.address || null,
         property_type: form.property_type, bedrooms: Number(form.bedrooms), bathrooms: Number(form.bathrooms),
         area_sqft: form.area_sqft ? Number(form.area_sqft) : null,
-        images: form.images ? form.images.split(",").map((s) => s.trim()).filter(Boolean) : [],
+        images: form.images.length > 0 ? form.images : [],
         created_by: user!.id,
       };
       if (editId) {

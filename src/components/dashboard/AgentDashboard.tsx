@@ -90,7 +90,7 @@ export default function AgentDashboard() {
       title: p.title, description: p.description || "", price: String(p.price),
       city: p.city, state: p.state || "", address: p.address || "",
       property_type: p.property_type, bedrooms: String(p.bedrooms), bathrooms: String(p.bathrooms),
-      area_sqft: p.area_sqft ? String(p.area_sqft) : "", images: (p.images || []).join(", "),
+      area_sqft: p.area_sqft ? String(p.area_sqft) : "", images: (p.images || []) as string[],
     });
     setEditId(p.id);
     setDialogOpen(true);

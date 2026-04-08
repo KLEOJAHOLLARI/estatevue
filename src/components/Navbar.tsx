@@ -37,6 +37,11 @@ export default function Navbar() {
               <LayoutDashboard className="h-4 w-4 inline mr-1" />Dashboard
             </Link>
           )}
+          {hasRole("admin") && (
+            <Link to="/admin" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              Admin
+            </Link>
+          )}
           {user ? (
             <div className="flex items-center gap-3">
               <span className="text-sm text-muted-foreground"><User className="h-4 w-4 inline mr-1" />{user.email}</span>

@@ -12,10 +12,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Mail, MailOpen, Building2, MessageSquare } from "lucide-react";
+import ImageUpload from "@/components/ImageUpload";
 
 const emptyForm = {
   title: "", description: "", price: "", city: "", state: "", address: "",
-  property_type: "house", bedrooms: "3", bathrooms: "2", area_sqft: "", images: "",
+  property_type: "house", bedrooms: "3", bathrooms: "2", area_sqft: "", images: [] as string[],
 };
 
 export default function AgentDashboard() {
@@ -48,7 +49,7 @@ export default function AgentDashboard() {
         city: form.city, state: form.state || null, address: form.address || null,
         property_type: form.property_type, bedrooms: Number(form.bedrooms), bathrooms: Number(form.bathrooms),
         area_sqft: form.area_sqft ? Number(form.area_sqft) : null,
-        images: form.images ? form.images.split(",").map((s) => s.trim()).filter(Boolean) : [],
+        images: form.images.length > 0 ? form.images : [],
         created_by: user!.id,
       };
       if (editId) {
@@ -89,7 +90,7 @@ export default function AgentDashboard() {
       title: p.title, description: p.description || "", price: String(p.price),
       city: p.city, state: p.state || "", address: p.address || "",
       property_type: p.property_type, bedrooms: String(p.bedrooms), bathrooms: String(p.bathrooms),
-      area_sqft: p.area_sqft ? String(p.area_sqft) : "", images: (p.images || []).join(", "),
+      area_sqft: p.area_sqft ? String(p.area_sqft) : "", images: (p.images || []) as string[],
     });
     setEditId(p.id);
     setDialogOpen(true);
@@ -137,7 +138,7 @@ export default function AgentDashboard() {
                 <Input placeholder="Baths" type="number" value={form.bathrooms} onChange={(e) => setForm({ ...form, bathrooms: e.target.value })} />
               </div>
               <Input placeholder="Area (sqft)" type="number" value={form.area_sqft} onChange={(e) => setForm({ ...form, area_sqft: e.target.value })} />
-              <Input placeholder="Image URLs (comma separated)" value={form.images} onChange={(e) => setForm({ ...form, images: e.target.value })} />
+              <ImageUpload images={form.images} onChange={(imgs) => setForm({ ...form, images: imgs })} />
               <Button type="submit" className="w-full" disabled={saveMutation.isPending}>{saveMutation.isPending ? "Saving..." : editId ? "Update" : "Create"}</Button>
             </form>
           </DialogContent>

@@ -20,8 +20,8 @@ export default function Register() {
     setLoading(true);
     try {
       await signUp(form.email, form.password, form.fullName, form.role);
-      toast.success("Account created! Check your email to verify.");
-      navigate("/login");
+      toast.success("Account created! Your account is pending admin approval. You can browse properties but some features are restricted.");
+      navigate("/");
     } catch (err: any) {
       toast.error(err.message || "Registration failed");
     } finally {

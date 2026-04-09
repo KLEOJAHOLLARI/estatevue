@@ -10,7 +10,7 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   roles: AppRole[];
-  profile: { full_name: string | null; phone: string | null; avatar_url: string | null } | null;
+  profile: { full_name: string | null; phone: string | null; avatar_url: string | null; is_approved: boolean } | null;
   signUp: (email: string, password: string, fullName: string, role?: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -29,7 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const fetchUserData = async (userId: string) => {
     const [rolesRes, profileRes] = await Promise.all([
       supabase.from("user_roles").select("role").eq("user_id", userId),
-      supabase.from("profiles").select("full_name, phone, avatar_url").eq("user_id", userId).single(),
+      supabase.from("profiles").select("full_name, phone, avatar_url, is_approved").eq("user_id", userId).single(),
     ]);
     if (rolesRes.data) setRoles(rolesRes.data.map((r) => r.role));
     if (profileRes.data) setProfile(profileRes.data);

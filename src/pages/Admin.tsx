@@ -105,6 +105,18 @@ export default function Admin() {
     onError: (err: any) => toast.error(err.message),
   });
 
+  const toggleApproval = useMutation({
+    mutationFn: async ({ userId, approved }: { userId: string; approved: boolean }) => {
+      const { error } = await supabase.from("profiles").update({ is_approved: approved }).eq("user_id", userId);
+      if (error) throw error;
+    },
+    onSuccess: (_, vars) => {
+      toast.success(vars.approved ? "User approved" : "User approval revoked");
+      queryClient.invalidateQueries({ queryKey: ["admin-all-users"] });
+    },
+    onError: (err: any) => toast.error(err.message),
+  });
+
   const fmt = (n: number) =>
     new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
 
@@ -353,6 +365,7 @@ export default function Admin() {
                     <TableHeader>
                       <TableRow>
                         <TableHead>User</TableHead>
+                        <TableHead>Status</TableHead>
                         <TableHead>Current Role</TableHead>
                         <TableHead>Change Role</TableHead>
                         <TableHead className="text-right">Actions</TableHead>
@@ -370,6 +383,13 @@ export default function Admin() {
                             </div>
                           </TableCell>
                           <TableCell>
+                            {u.is_approved ? (
+                              <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20">Approved</Badge>
+                            ) : (
+                              <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/20">Pending</Badge>
+                            )}
+                          </TableCell>
+                          <TableCell>
                             <Badge variant="outline" className="capitalize">{u.user_roles?.[0]?.role || "user"}</Badge>
                           </TableCell>
                           <TableCell>
@@ -383,15 +403,26 @@ export default function Admin() {
                             </Select>
                           </TableCell>
                           <TableCell className="text-right">
-                            <Button size="sm" variant="ghost" className="text-destructive hover:bg-destructive/10" onClick={() => { if (confirm("Delete this user's data?")) deleteUser.mutate(u.user_id); }}>
-                              <Trash2 className="h-4 w-4 mr-1" />Delete
-                            </Button>
+                            <div className="flex justify-end gap-1">
+                              {u.is_approved ? (
+                                <Button size="sm" variant="ghost" className="text-amber-600 hover:bg-amber-50" onClick={() => toggleApproval.mutate({ userId: u.user_id, approved: false })}>
+                                  <XCircle className="h-4 w-4 mr-1" />Revoke
+                                </Button>
+                              ) : (
+                                <Button size="sm" variant="ghost" className="text-emerald-600 hover:bg-emerald-50" onClick={() => toggleApproval.mutate({ userId: u.user_id, approved: true })}>
+                                  <CheckCircle className="h-4 w-4 mr-1" />Approve
+                                </Button>
+                              )}
+                              <Button size="sm" variant="ghost" className="text-destructive hover:bg-destructive/10" onClick={() => { if (confirm("Delete this user's data?")) deleteUser.mutate(u.user_id); }}>
+                                <Trash2 className="h-4 w-4 mr-1" />Delete
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}
                       {filteredUsers.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={4} className="text-center text-muted-foreground py-8">No users found</TableCell>
+                          <TableCell colSpan={5} className="text-center text-muted-foreground py-8">No users found</TableCell>
                         </TableRow>
                       )}
                     </TableBody>

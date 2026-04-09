@@ -107,7 +107,7 @@ export default function Admin() {
 
   const toggleApproval = useMutation({
     mutationFn: async ({ userId, approved }: { userId: string; approved: boolean }) => {
-      const { error } = await supabase.from("profiles").update({ is_approved: approved } as any).eq("user_id", userId);
+      const { error } = await supabase.from("profiles").update({ is_approved: approved }).eq("user_id", userId);
       if (error) throw error;
     },
     onSuccess: (_, vars) => {

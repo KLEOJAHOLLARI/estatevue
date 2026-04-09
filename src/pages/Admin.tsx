@@ -105,6 +105,18 @@ export default function Admin() {
     onError: (err: any) => toast.error(err.message),
   });
 
+  const toggleApproval = useMutation({
+    mutationFn: async ({ userId, approved }: { userId: string; approved: boolean }) => {
+      const { error } = await supabase.from("profiles").update({ is_approved: approved } as any).eq("user_id", userId);
+      if (error) throw error;
+    },
+    onSuccess: (_, vars) => {
+      toast.success(vars.approved ? "User approved" : "User approval revoked");
+      queryClient.invalidateQueries({ queryKey: ["admin-all-users"] });
+    },
+    onError: (err: any) => toast.error(err.message),
+  });
+
   const fmt = (n: number) =>
     new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
 

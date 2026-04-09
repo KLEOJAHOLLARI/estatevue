@@ -105,6 +105,8 @@ const ChartTooltipContent = React.forwardRef<
       active,
       payload,
       className,
+      // @ts-ignore - recharts typing mismatch
+      label,
       indicator = "dot",
       hideLabel = false,
       hideIndicator = false,
@@ -230,7 +232,8 @@ const ChartLegend = RechartsPrimitive.Legend;
 const ChartLegendContent = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div"> &
-    Pick<RechartsPrimitive.LegendProps, "payload" | "verticalAlign"> & {
+    Pick<RechartsPrimitive.LegendProps, "verticalAlign"> & {
+      payload?: any[];
       hideIcon?: boolean;
       nameKey?: string;
     }

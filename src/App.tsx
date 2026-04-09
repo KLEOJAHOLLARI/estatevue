@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/lib/auth";
 import Navbar from "@/components/Navbar";
+import PendingApprovalBanner from "@/components/PendingApprovalBanner";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="*" element={
               <>
                 <Navbar />
+                <PendingApprovalBanner />
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/listings" element={<Listings />} />

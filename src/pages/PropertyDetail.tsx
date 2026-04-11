@@ -211,6 +211,7 @@ export default function PropertyDetail() {
               </div>
             </Card>
           )}
+          <ScheduleTourForm propertyId={property.id} />
           <MortgageCalculator price={Number(property.price)} />
           <Card>
             <CardContent className="p-5">

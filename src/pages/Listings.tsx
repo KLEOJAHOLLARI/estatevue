@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, lazy, Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,6 +8,8 @@ import PropertyCardSkeleton from "@/components/PropertyCardSkeleton";
 import PropertyFilters from "@/components/PropertyFilters";
 import { Button } from "@/components/ui/button";
 import { LayoutGrid, Map, Building2 } from "lucide-react";
+
+const PropertyMap = lazy(() => import("@/components/PropertyMap"));
 
 export default function Listings() {
   const { user } = useAuth();

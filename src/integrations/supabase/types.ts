@@ -191,6 +191,47 @@ export type Database = {
           },
         ]
       }
+      tour_bookings: {
+        Row: {
+          created_at: string
+          id: string
+          message: string | null
+          preferred_date: string
+          preferred_time: string
+          property_id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          preferred_date: string
+          preferred_time: string
+          property_id: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          preferred_date?: string
+          preferred_time?: string
+          property_id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tour_bookings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string

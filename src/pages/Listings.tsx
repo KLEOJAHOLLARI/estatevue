@@ -113,8 +113,10 @@ export default function Listings() {
                 <PropertyCard key={p.id} property={p} isFavorited={favorites?.has(p.id)} />
               ))}
             </div>
-            <div className="rounded-xl bg-muted border flex items-center justify-center min-h-[400px] text-muted-foreground sticky top-24">
-              <Map className="h-8 w-8 mr-2" /> Map View — Add coordinates to properties
+            <div className="sticky top-24">
+              <Suspense fallback={<div className="rounded-xl bg-muted border flex items-center justify-center min-h-[500px] text-muted-foreground animate-pulse">Loading map...</div>}>
+                <PropertyMap properties={filtered} />
+              </Suspense>
             </div>
           </div>
         )}

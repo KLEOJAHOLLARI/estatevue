@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import ContactAgentForm from "@/components/ContactAgentForm";
 import MortgageCalculator from "@/components/MortgageCalculator";
+import ScheduleTourForm from "@/components/ScheduleTourForm";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";

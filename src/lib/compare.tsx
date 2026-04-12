@@ -11,7 +11,7 @@ export interface CompareProperty {
   bathrooms: number;
   area_sqft: number | null;
   images: string[] | null;
-  address: string | null;
+  address?: string | null;
 }
 
 interface CompareContextType {

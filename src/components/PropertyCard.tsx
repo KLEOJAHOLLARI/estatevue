@@ -15,6 +15,7 @@ interface Props {
     price: number;
     city: string;
     state: string | null;
+    address?: string | null;
     property_type: string;
     bedrooms: number;
     bathrooms: number;

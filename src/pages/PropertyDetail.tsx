@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { MapPin, Bed, Bath, Maximize, Calendar, ChevronLeft, ChevronRight, ArrowLeft, User, Phone } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import SimilarProperties from "@/components/SimilarProperties";
 
 export default function PropertyDetail() {
   const { id } = useParams<{ id: string }>();
@@ -220,6 +221,13 @@ export default function PropertyDetail() {
           </Card>
         </div>
       </div>
+
+      <SimilarProperties
+        propertyId={property.id}
+        city={property.city}
+        propertyType={property.property_type}
+        price={Number(property.price)}
+      />
     </div>
   );
 }

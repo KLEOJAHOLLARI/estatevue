@@ -26,8 +26,10 @@ interface Props {
 
 export default function PropertyCard({ property, isFavorited }: Props) {
   const { user } = useAuth();
+  const { toggle, isSelected } = useCompare();
   const queryClient = useQueryClient();
   const image = property.images?.[0] || "/placeholder.svg";
+  const compared = isSelected(property.id);
 
   const toggleFav = useMutation({
     mutationFn: async () => {
@@ -59,14 +61,23 @@ export default function PropertyCard({ property, isFavorited }: Props) {
             For Sale
           </Badge>
         </div>
-        {user && (
+        <div className="absolute right-3 top-3 flex flex-col gap-1.5">
+          {user && (
+            <button
+              onClick={(e) => { e.preventDefault(); toggleFav.mutate(); }}
+              className="rounded-full bg-card/80 p-2.5 backdrop-blur-sm transition-all hover:bg-card hover:scale-110"
+            >
+              <Heart className={`h-4 w-4 transition-colors ${isFavorited ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
+            </button>
+          )}
           <button
-            onClick={(e) => { e.preventDefault(); toggleFav.mutate(); }}
-            className="absolute right-3 top-3 rounded-full bg-card/80 p-2.5 backdrop-blur-sm transition-all hover:bg-card hover:scale-110"
+            onClick={(e) => { e.preventDefault(); toggle(property); }}
+            className={`rounded-full p-2.5 backdrop-blur-sm transition-all hover:scale-110 ${compared ? "bg-primary text-primary-foreground" : "bg-card/80 hover:bg-card text-muted-foreground"}`}
+            title={compared ? "Remove from compare" : "Add to compare"}
           >
-            <Heart className={`h-4 w-4 transition-colors ${isFavorited ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
+            <GitCompareArrows className="h-4 w-4" />
           </button>
-        )}
+        </div>
         <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <p className="font-heading text-2xl font-bold text-white drop-shadow-lg">{fmt(property.price)}</p>
         </div>

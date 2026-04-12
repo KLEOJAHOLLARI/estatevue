@@ -1,9 +1,10 @@
 import { Link } from "react-router-dom";
-import { Heart, MapPin, Bed, Bath, Maximize } from "lucide-react";
+import { Heart, MapPin, Bed, Bath, Maximize, GitCompareArrows } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { useCompare } from "@/lib/compare";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 

@@ -4,13 +4,16 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/lib/auth";
+import { CompareProvider } from "@/lib/compare";
 import Navbar from "@/components/Navbar";
 import PendingApprovalBanner from "@/components/PendingApprovalBanner";
+import CompareBar from "@/components/CompareBar";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Listings from "./pages/Listings";
 import PropertyDetail from "./pages/PropertyDetail";
+import Compare from "./pages/Compare";
 import Favorites from "./pages/Favorites";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
@@ -25,25 +28,29 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="*" element={
-              <>
-                <Navbar />
-                <PendingApprovalBanner />
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/listings" element={<Listings />} />
-                  <Route path="/property/:id" element={<PropertyDetail />} />
-                  <Route path="/favorites" element={<Favorites />} />
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/admin" element={<Admin />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </>
-            } />
-          </Routes>
+          <CompareProvider>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="*" element={
+                <>
+                  <Navbar />
+                  <PendingApprovalBanner />
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/listings" element={<Listings />} />
+                    <Route path="/property/:id" element={<PropertyDetail />} />
+                    <Route path="/compare" element={<Compare />} />
+                    <Route path="/favorites" element={<Favorites />} />
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/admin" element={<Admin />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                  <CompareBar />
+                </>
+              } />
+            </Routes>
+          </CompareProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
